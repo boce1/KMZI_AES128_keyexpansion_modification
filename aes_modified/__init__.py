@@ -12,13 +12,11 @@ def round(word):
     next_byte_2 = next_byte_1 ^ byte2
     next_byte_3 = byte3 ^ next_byte_4
 
-    permuteted_bytes = p_box(word)
-    next_byte_1, next_byte_2, next_byte_3, next_byte_4 = devide_bytes(permuteted_bytes)
-
     next_byte_2 = substitution(next_byte_2)
-    next_byte_2 = substitution(next_byte_3)
+    next_byte_3 = substitution(next_byte_3)
 
     output = (next_byte_1 << 24) | (next_byte_2 << 16) | (next_byte_3 << 8) | next_byte_4
+    output = p_box(output)
     return output
     
 
@@ -35,6 +33,9 @@ def key_expansion(key_raw_bytes):
             key_row.extend(bytes)
         keys_output.append(key_row)
         key_row = []
+
+    for i in range(11):
+        print(list(map(hex, keys_output[i])))
     return keys_output
 # # #
 
@@ -82,9 +83,6 @@ def mix_columns(matrix):
     def mul_by_3(a):
         return gmul(a, 3)
     
-    # Create a copy of the matrix for our result
-    result = [0] * 16
-    
     # Process each column (4 columns)
     for col in range(4):
         # Get the column values
@@ -94,19 +92,35 @@ def mix_columns(matrix):
         c3 = matrix[col * 4 + 3]
         
         # Calculate the new values
-        result[col * 4] = mul_by_2(c0) ^ mul_by_3(c1) ^ c2 ^ c3
-        result[col * 4 + 1] = c0 ^ mul_by_2(c1) ^ mul_by_3(c2) ^ c3
-        result[col * 4 + 2] = c0 ^ c1 ^ mul_by_2(c2) ^ mul_by_3(c3)
-        result[col * 4 + 3] = mul_by_3(c0) ^ c1 ^ c2 ^ mul_by_2(c3)
-    
-    return result
+        matrix[col * 4] = mul_by_2(c0) ^ mul_by_3(c1) ^ c2 ^ c3
+        matrix[col * 4 + 1] = c0 ^ mul_by_2(c1) ^ mul_by_3(c2) ^ c3
+        matrix[col * 4 + 2] = c0 ^ c1 ^ mul_by_2(c2) ^ mul_by_3(c3)
+        matrix[col * 4 + 3] = mul_by_3(c0) ^ c1 ^ c2 ^ mul_by_2(c3)
 
-#def aes(plaintext_raw_bytes, key_raw_bytes):
-#    plaintext_int = [x for x in plaintext_raw_bytes]
-#    keys_int = key_expansion(key_raw_bytes)
-#
-#    # preround
-#    keys_int
+def add_round_key(matrix, round_key):
+    for i in range(len(matrix)):
+        matrix[i] ^= round_key[i]
 
+def aes(plaintext_raw_bytes, key_raw_bytes):
+    plaintext_int = [x for x in plaintext_raw_bytes]
+    keys_int = key_expansion(key_raw_bytes)
+
+    # preround
+    add_round_key(plaintext_int, keys_int[0])
+    # # #
+
+    for i in range(1, 10): # 1 to 9 (9 rounds)
+        round_key = keys_int[i]
+        sub_bytes(plaintext_int)
+        shift_rows(plaintext_int)
+        mix_columns(plaintext_int)
+        add_round_key(plaintext_int, round_key)
+
+    # final round
+    sub_bytes(plaintext_int)
+    shift_rows(plaintext_int)
+    add_round_key(plaintext_int, keys_int[len(keys_int) - 1])
+
+    return bytearray(plaintext_int)
 
 # # #
