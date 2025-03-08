@@ -34,8 +34,8 @@ def key_expansion(key_raw_bytes):
         keys_output.append(key_row)
         key_row = []
 
-    for i in range(11):
-        print(list(map(hex, keys_output[i])))
+    #for i in range(11): # visualizing key expansion
+    #    print(list(map(hex, keys_output[i])))
     return keys_output
 # # #
 
