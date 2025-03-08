@@ -8,7 +8,7 @@ aes_cipher = AES.new(test.key, AES.MODE_ECB)
 
 print("Test 1:")
 ciphertext_1 = aes_cipher.encrypt(test.plaintext_1)
-aes(test.plaintext_1, test.key)
+#aes(test.plaintext_1, test.key)
 #test.print_cipher_text(ciphertext_1)
 print()
 '''
