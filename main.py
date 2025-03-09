@@ -16,8 +16,8 @@ def calculate_avalanche(bytearray):
             changed_standard_AES = aes_cipher.encrypt(temp)
             changed_modified_AES = aes(temp, key)
 
-            sum_standard_aes += avalanche_effect_percentage(standard_AES, changed_standard_AES)
-            sum_modified_aes += avalanche_effect_percentage(modified_AES, changed_modified_AES)
+            sum_standard_aes += avalanche_effect(standard_AES, changed_standard_AES)
+            sum_modified_aes += avalanche_effect(modified_AES, changed_modified_AES)
             temp = bytearray[:]
             
     return sum_standard_aes / (len(temp) * 8), sum_modified_aes / (len(temp) * 8)
