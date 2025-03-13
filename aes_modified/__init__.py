@@ -2,7 +2,7 @@ from .s_box import *
 from .p_box import *
 
 # MODIFIED PART OF AES
-def round(word):
+def g(word):
     # word is 32bits or 4 bytes
     byte1, byte2, byte3, byte4 = devide_bytes(word)
 
@@ -27,13 +27,18 @@ def key_expansion(key_raw_bytes):
     key_row = []
 
     for i in range(11): # 1 key per round, there is 10 rounds + 1 key for initialializing block
+        # round
+        words[1] = g(words[1])
+        words[2] = g(words[2])  
+
+        words[0] ^= words[1]
+        words[3] ^= words[2]
+
         for j in range(4):
-            words[j] = round(words[j])
-            bytes = devide_bytes(words[j])
-            key_row.extend(bytes)
+            key_row.extend(devide_bytes(words[j]))
         keys_output.append(key_row)
         key_row = []
-
+        # round
     #for i in range(11): # visualizing key expansion
     #    print(list(map(hex, keys_output[i])))
     return keys_output
